@@ -49,9 +49,29 @@ export function Draft(props: DraftProps): JSX.Element {
 
     const [selectEmoji, setSelectEmoji] = useState<boolean>(false)
 
+    const [typingEmoji, setTypingEmoji] = useState<boolean>(false)
+
+    const [searchEmoji, setSearchEmoji] = useState<string>('')
+
     const [customEmoji, setCustomEmoji] = useState<CustomEmoji[]>([])
 
     const theme = useTheme()
+
+    const isTypingEmoji = (text: string, pos: number | null): boolean => {
+        let isTypingEmoji = false
+        const emojiRegExp = /:[^  (\r\n|\n|\r)]*[^:(\r\n|\n|\r)]$/
+        if (pos != null) {
+            const processedString = text.slice(0, pos)
+            const emojiWord = emojiRegExp.exec(processedString)
+            if (emojiWord != null) {
+                isTypingEmoji = true
+                // console.log(emojiWord[0].slice(1))
+                setSearchEmoji(emojiWord[0].slice(1))
+            }
+        }
+
+        return isTypingEmoji
+    }
 
     const post = (): void => {
         const payloadObj = {
@@ -117,6 +137,9 @@ export function Draft(props: DraftProps): JSX.Element {
                 value={draft}
                 onChange={(e) => {
                     setDraft(e.target.value)
+                    setTypingEmoji(
+                        isTypingEmoji(e.target.value, e.target.selectionStart)
+                    )
                 }}
                 sx={{
                     '& .MuiInputLabel-root': {
